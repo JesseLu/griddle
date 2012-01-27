@@ -1,4 +1,4 @@
-""" Defines the DistGrid class, which stores the data in the grid. """
+""" Defines the Grid class, which stores the data in the grid. """
 
 from pycuda import gpuarray as ga
 from pycuda import driver
@@ -18,14 +18,14 @@ _norm = ReductionKernel(np.complex128, neutral="0",
                 arguments="pycuda::complex<double> *x")
 
 
-class DistGrid:
+class Grid:
     """ Manages pycuda GPUArrays across multiple GPUs. """
 
     def __init__(self, array=None):
-        """ Initialize a DistGrid.
+        """ Initialize a Grid.
 
-        DistGrid() creates an empty grid.
-        DistGrid(array) creates a grid filled with the values of array,
+        Grid() creates an empty grid.
+        Grid(array) creates a grid filled with the values of array,
             where array is a numpy array.
         """
         if array is not None:
@@ -41,7 +41,7 @@ class DistGrid:
 
     def dup(self):
         """ Create a duplicate grid and return it. """
-        dup_grid = DistGrid()
+        dup_grid = Grid()
         dup_grid.g = ga.empty_like(self.g)
         driver.memcpy_dtod(dup_grid.g.gpudata, self.g.gpudata, self.g.nbytes)
         return dup_grid

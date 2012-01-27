@@ -6,15 +6,12 @@ import numpy as np
 # Load the jinja environment.
 jinja_env = Environment(loader=PackageLoader(__name__, 'templates'))
 
-class DistKern():
+class Kernel():
     def __init__(self, space, code, *params):
         """Return a cuda function that will execute on a grid.
         """
 
         # Initialize parameters.
-
-        if len(space) < 3:
-            space= ((1, 1, 1) + space)[-3:]
         self.shape = space # Size of the operation.
         self.block_shapes, self.grid_shapes = _get_shapes(self.shape)
 
@@ -28,8 +25,7 @@ class DistKern():
         f.write(cuda_source)
 
         # Compile the code into a callable cuda function.
-        mod = compiler.SourceModule(cuda_source)
-        self.fun = mod.get_function('griddle_kernel')
+        mod = compiler.SourceModule(cuda_source) self.fun = mod.get_function('griddle_kernel')
 
 
     def __call__(self, *grids):

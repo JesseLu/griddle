@@ -1,10 +1,10 @@
 import numpy as np
 import unittest
 import __init__
-from distributed_grid import DistGrid as grid 
+from grid import Grid
 
-class TestDistGrid(unittest.TestCase):
-    """ Test the DistGrid class. """
+class TestGrid(unittest.TestCase):
+    """ Test the Grid class. """
 
     def setUp(self):
         """ Create grids of various sizes and data types to test on. """
@@ -15,17 +15,17 @@ class TestDistGrid(unittest.TestCase):
         dtypes = [np.float32, np.float64, np.complex64, np.complex128] 
 
         self.a = [] # Numpy arrays.
-        self.d = [] # DistGrids.
+        self.d = [] # Grids.
         for dtype in dtypes:
             for shape in shapes:
                 test_data = np.random.randn(*shape).astype(dtype)
                 self.a.append(test_data)
-                self.d.append(grid(test_data))
+                self.d.append(Grid(test_data))
 
     def test_init(self):
-        """ Test the DistGrid class constructor. """
+        """ Test the Grid class constructor. """
         # Make sure we reject bad input in the constructor.
-        self.assertRaises(TypeError, grid, 'abc')
+        self.assertRaises(TypeError, Grid, 'abc')
 
     def test_get(self):
         """ Test the get function. """
