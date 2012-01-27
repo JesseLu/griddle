@@ -29,7 +29,15 @@ class DistGrid:
             where array is a numpy array.
         """
         if array is not None:
-            self.g = ga.to_gpu(array) # Copy data to the GPU.
+            if type(array) is np.ndarray:
+                self.g = ga.to_gpu(array) # Copy data to the GPU.
+            else:
+                raise TypeError('Input must be of type numpy.ndarray.')
+                    
+
+    def get(self):
+        """ Return the data as a numpy ndarray. """
+        return self.g.get()
 
     def dup(self):
         """ Create a duplicate grid and return it. """
@@ -45,7 +53,8 @@ class DistGrid:
 
     def aby(self, a, b, y):
         """ Perform x = a*x + b*y. """
-        _axby(a, self.g, b, y.g)
+        _axby(np.array(a).astype(np.complex128), self.g, \
+            np.array(b).astype(np.complex128), y.g)
 
     def norm(self):
         """ Calculate the norm over the elements of the grid."""

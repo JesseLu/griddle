@@ -6,25 +6,20 @@ import numpy as np
 # Load the jinja environment.
 jinja_env = Environment(loader=PackageLoader(__name__, 'templates'))
 
-class TraverseKernel():
-    def __init__(self, shape, code, *params):
+class DistKern():
+    def __init__(self, space, code, *params):
         """Return a cuda function that will execute on a grid.
-
-        Input arguments:
-        shape -- the size of the grid.
-        code -- the CUDA source code to be executed at every cell.
-        *params -- (type, name) tuples of the input parameters.
-
-        Output arguments:
-        wrapped_fun -- a function that accepts a list of distributed grids.
         """
 
         # Initialize parameters.
-        self.shape = shape # Size of the operation.
-        self.block_shapes, self.grid_shapes = _get_shapes(shape)
+
+        if len(space) < 3:
+            space= ((1, 1, 1) + space)[-3:]
+        self.shape = space # Size of the operation.
+        self.block_shapes, self.grid_shapes = _get_shapes(self.shape)
 
         # Get the template and render it using jinja2.
-        template = jinja_env.get_template('traverse.cu') 
+        template = jinja_env.get_template('griddle_kernel.cu') 
         cuda_source = template.render(  params=params, \
                                         dims=self.shape, \
                                         loop_code=code, \
@@ -34,7 +29,7 @@ class TraverseKernel():
 
         # Compile the code into a callable cuda function.
         mod = compiler.SourceModule(cuda_source)
-        self.fun = mod.get_function('traverse')
+        self.fun = mod.get_function('griddle_kernel')
 
 
     def __call__(self, *grids):
@@ -46,7 +41,7 @@ class TraverseKernel():
 
 def _get_shapes(shape):
     """ Obtain the different thread block shapes to try. """
-    block_shapes = (1, 1, 20)
+    block_shapes = (1, 20, 20)
     grid_shapes = (1, int(np.ceil(shape[1]/block_shapes[1]) + 1), \
                     int(np.ceil(shape[2]/block_shapes[2]) + 1))
     return block_shapes, grid_shapes
